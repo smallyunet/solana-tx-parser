@@ -2,11 +2,19 @@
   "name": "solana-tx-decoder",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "test": "vitest",
     "build": "tsc",
-    "build:docs": "typedoc --out docs src/index.ts"
+    "build:docs": "typedoc --out docs src/index.ts",
+    "prepublishOnly": "pnpm build"
   },
   "keywords": [],
   "author": "",
