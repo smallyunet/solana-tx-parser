@@ -15,7 +15,7 @@
 
 ## Phase 3: Protocol Expansion (Q1 2026)
 - [x] **SPL Token Parser**: Full support for mints, burns, and transfers.
-- [ ] **Jupiter Aggregator**: Parsing swaps and routing.
+- [x] **Jupiter Aggregator**: Parsing swaps and routing.
 - [ ] **Raydium & Orca**: Liquidity provision and swap parsing.
 - [ ] **Address Lookup Tables (ALT)**: Full resolution support.
 

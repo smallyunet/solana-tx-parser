@@ -2,6 +2,7 @@ import { Connection, PublicKey, TransactionResponse, VersionedTransactionRespons
 import { ParserRegistry } from './core/registry';
 import { SystemProgramParser } from './parsers/system';
 import { SplTokenParser } from './parsers/spl-token';
+import { JupiterParser } from './parsers/jupiter';
 import { AnchorParser } from './parsers/anchor';
 import { ParsedResult, ParserContext, ParsedAction } from './types';
 
@@ -18,6 +19,7 @@ export class SolanaParser {
         // Register default parsers
         this.registry.register(new SystemProgramParser());
         this.registry.register(new SplTokenParser());
+        this.registry.register(new JupiterParser());
     }
 
     getRegistry(): ParserRegistry {
@@ -47,6 +49,14 @@ export class SolanaParser {
 
         if ('staticAccountKeys' in msgAny) {
             accountKeys = msgAny.staticAccountKeys;
+            // Append loaded addresses if available (for Versioned Transactions)
+            if (tx.meta && tx.meta.loadedAddresses) {
+                accountKeys = [
+                    ...accountKeys,
+                    ...tx.meta.loadedAddresses.writable,
+                    ...tx.meta.loadedAddresses.readonly
+                ];
+            }
         } else {
             accountKeys = msgAny.accountKeys;
         }
