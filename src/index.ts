@@ -1,6 +1,7 @@
 import { Connection, PublicKey, TransactionResponse, VersionedTransactionResponse, Transaction, VersionedTransaction, Message, VersionedMessage } from '@solana/web3.js';
 import { ParserRegistry } from './core/registry';
 import { SystemProgramParser } from './parsers/system';
+import { SplTokenParser } from './parsers/spl-token';
 import { AnchorParser } from './parsers/anchor';
 import { ParsedResult, ParserContext, ParsedAction } from './types';
 
@@ -16,6 +17,7 @@ export class SolanaParser {
 
         // Register default parsers
         this.registry.register(new SystemProgramParser());
+        this.registry.register(new SplTokenParser());
     }
 
     getRegistry(): ParserRegistry {

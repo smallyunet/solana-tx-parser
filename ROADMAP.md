@@ -8,13 +8,13 @@
 - [x] Basic Documentation
 
 ## Phase 2: Infrastructure (In Progress)
-- [ ] CI/CD Pipelines (GitHub Actions)
-- [ ] Automated Testing Setup
+- [x] CI/CD Pipelines (GitHub Actions)
+- [x] Automated Testing Setup
 - [ ] API Documentation (TypeDoc)
 - [ ] Community Guidelines
 
 ## Phase 3: Protocol Expansion (Q1 2026)
-- [ ] **SPL Token Parser**: Full support for mints, burns, and transfers.
+- [x] **SPL Token Parser**: Full support for mints, burns, and transfers.
 - [ ] **Jupiter Aggregator**: Parsing swaps and routing.
 - [ ] **Raydium & Orca**: Liquidity provision and swap parsing.
 - [ ] **Address Lookup Tables (ALT)**: Full resolution support.
