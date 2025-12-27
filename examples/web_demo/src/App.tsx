@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Connection } from '@solana/web3.js';
 import { SolanaParser, TransactionView, ParsedResult } from '../../../src/index';
 import { Buffer } from 'buffer';
-import { MOCK_DATA } from './mock-data';
 
 // Polyfill Buffer for browser
 window.Buffer = Buffer;
@@ -13,25 +12,12 @@ export const App: React.FC = () => {
     const [result, setResult] = useState<ParsedResult | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [useMock, setUseMock] = useState(false);
 
     const handleDecode = async () => {
         if (!txId.trim()) return;
         setLoading(true);
         setError(null);
         setResult(null);
-
-        // Check for mock data first if enabled or if it's one of our examples
-        if (useMock || MOCK_DATA[txId.trim()]) {
-            const mock = MOCK_DATA[txId.trim()];
-            if (mock) {
-                setTimeout(() => {
-                    setResult(mock);
-                    setLoading(false);
-                }, 500);
-                return;
-            }
-        }
 
         try {
             const connection = new Connection(rpcUrl, 'confirmed');
@@ -46,14 +32,8 @@ export const App: React.FC = () => {
             console.error('Decoding error:', e);
             const is403 = e.message?.includes('403');
 
-            if (is403 && MOCK_DATA[txId.trim()]) {
-                setError('RPC blocked (403). Falling back to mock data...');
-                setTimeout(() => {
-                    setResult(MOCK_DATA[txId.trim()]);
-                    setError(null);
-                }, 1000);
-            } else if (is403) {
-                setError('RPC Error (403 Forbidden): The public Solana RPC often blocks requests from browsers. Please try a different RPC URL (e.g., Alchemy or Helius) or use a preset with mock data.');
+            if (is403) {
+                setError('RPC Error (403 Forbidden): The public Solana RPC blocks browser requests. Please use a private RPC URL (e.g., Helius, Alchemy, or QuickNode).');
             } else {
                 setError(e.message || 'Error parsing transaction');
             }
@@ -230,24 +210,9 @@ export const App: React.FC = () => {
                                     backgroundColor: '#000', color: '#fff', fontSize: '0.85rem', boxSizing: 'border-box'
                                 }}
                             />
-                        </div>
-
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', padding: '1rem', backgroundColor: '#111', borderRadius: '12px' }} onClick={() => setUseMock(!useMock)}>
-                            <div style={{
-                                width: '40px', height: '22px', backgroundColor: useMock ? '#14F195' : '#222',
-                                borderRadius: '12px', position: 'relative', transition: 'background-color 0.2s'
-                            }}>
-                                <div style={{
-                                    width: '18px', height: '18px', backgroundColor: '#fff', borderRadius: '50%',
-                                    position: 'absolute', top: '2px', left: useMock ? '20px' : '2px',
-                                    transition: 'left 0.2s',
-                                    boxShadow: '0 0 5px rgba(0,0,0,0.5)'
-                                }} />
-                            </div>
-                            <div>
-                                <span style={{ fontSize: '0.9rem', fontWeight: 600, display: 'block' }}>Mock Mode</span>
-                                <span style={{ fontSize: '0.75rem', opacity: 0.5 }}>Simulated response</span>
-                            </div>
+                            <p style={{ fontSize: '0.75rem', opacity: 0.4, marginTop: '0.5rem' }}>
+                                Public RPC may block browser requests. Use Helius, Alchemy, or QuickNode.
+                            </p>
                         </div>
                     </section>
 

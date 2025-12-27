@@ -1,4 +1,4 @@
-name: E2E Tests
+name: E2E Tests with Results
 
 on:
   # Manual trigger with optional RPC URL input
@@ -13,7 +13,7 @@ on:
   schedule:
     - cron: '0 0 * * 0'  # Every Sunday at midnight UTC
 
-  # Run on main branch pushes (optional)
+  # Run on main branch pushes
   push:
     branches: [ main, master ]
     paths:
@@ -56,6 +56,14 @@ jobs:
         with:
           name: e2e-test-results
           path: |
-            test-results/
-            coverage/
-          retention-days: 7
+            docs/e2e-results/
+          retention-days: 30
+
+      - name: Commit results to repo
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add docs/e2e-results/ || true
+          git diff --staged --quiet || git commit -m "chore: update e2e test results [skip ci]"
+          git push || true
