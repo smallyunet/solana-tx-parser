@@ -17,8 +17,8 @@
     "build": "tsc",
     "build:docs": "typedoc --out docs src/index.ts",
     "prepublishOnly": "pnpm build",
-    "lint": "eslint src --ext .ts",
-    "lint:fix": "eslint src --ext .ts --fix",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\""
   },
@@ -59,6 +59,7 @@
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "eslint": "^9.0.0",
+    "globals": "^16.5.0",
     "prettier": "^3.4.0",
     "react": "^19.2.3",
     "typedoc": "^0.28.15",

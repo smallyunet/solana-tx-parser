@@ -49,10 +49,10 @@ export class AnchorParser implements Parser {
 
             if (decoded) {
                 // helper to format data
-                const formattedData: any = {};
-                // @ts-ignore
+                const formattedData: Record<string, unknown> = {};
+
                 if (decoded.data) {
-                    // @ts-ignore
+
                     for (const [key, value] of Object.entries(decoded.data)) {
                         formattedData[key] = value && value.toString ? value.toString() : value;
                     }
@@ -71,7 +71,7 @@ export class AnchorParser implements Parser {
             }
 
             return null;
-        } catch (e) {
+        } catch {
             // console.error("Anchor parse error", e);
             // Silent fail to allow fallback or just return null
             return null;

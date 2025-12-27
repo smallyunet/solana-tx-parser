@@ -1,5 +1,5 @@
 import React from 'react';
-import { ParsedResult, ParsedAction } from '../types';
+import { ParsedResult } from '../types';
 import { ActionCard } from './components/ActionCard';
 
 interface TransactionViewProps {

@@ -12,7 +12,7 @@ export interface ParsedAction {
     protocol: SupportedProtocol;
     type: ActionType;
     summary: string;
-    details: any;
+    details: Record<string, unknown>;
     direction?: ActionDirection;
 }
 

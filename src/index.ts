@@ -41,8 +41,8 @@ export class SolanaParser {
             if (!tx) return null;
 
             return this.parseTransactionResponse(tx, txId);
-        } catch (e) {
-            console.error("Error parsing transaction", e);
+        } catch (_e) {
+            console.error("Error parsing transaction", _e);
             return null;
         }
     }
@@ -120,8 +120,8 @@ export class SolanaParser {
                 success: true
             };
 
-        } catch (e) {
-            console.error("Simulation failed", e);
+        } catch (_e) {
+            console.error("Simulation failed", _e);
             return null;
         }
     }
@@ -137,61 +137,13 @@ export class SolanaParser {
 
         for (const ix of instructions) {
             const programId = accountKeys[ix.programIdIndex];
-            const parser = this.registry.get(programId);
 
-            if (parser) {
-                // ... (existing helper logic to reuse? slightly repeated code)
-                // To avoid massive duplication, let's keep it inline for now or create a helper method for invoking parser
-                const ixAccounts = ix.accountKeyIndexes ?
-                    ix.accountKeyIndexes.map((idx: number) => accountKeys[idx]) :
-                    ix.accounts.map((idx: number) => accountKeys[idx]);
+            const ixAccounts = ix.accountKeyIndexes ?
+                ix.accountKeyIndexes.map((idx: number) => accountKeys[idx]) :
+                ix.accounts.map((idx: number) => accountKeys[idx]);
 
-                const context: ParserContext = {
-                    tx: {} as any,
-                    instruction: {
-                        programId,
-                        keys: ixAccounts.map((pubkey: PublicKey) => ({ pubkey, isSigner: false, isWritable: false })),
-                        data: Buffer.from(ix.data),
-                    },
-                    accounts: accountKeys,
-                    programId,
-                    connection: this.connection
-                };
-                const action = await parser.parse(context);
-                if (action) actions.push(action);
-            } else {
-                // Try Anchor Parser fallback
-                const ixAccounts = ix.accountKeyIndexes ?
-                    ix.accountKeyIndexes.map((idx: number) => accountKeys[idx]) :
-                    ix.accounts.map((idx: number) => accountKeys[idx]);
-
-                const context: ParserContext = {
-                    tx: {} as any,
-                    instruction: {
-                        programId,
-                        keys: ixAccounts.map((pubkey: PublicKey) => ({ pubkey, isSigner: false, isWritable: false })),
-                        data: Buffer.from(ix.data),
-                    },
-                    accounts: accountKeys,
-                    programId,
-                    connection: this.connection
-                };
-
-                const anchorAction = await this.anchorParser.parse(context);
-                if (anchorAction) {
-                    actions.push(anchorAction);
-                } else {
-                    actions.push({
-                        protocol: 'Unknown',
-                        type: 'Unknown',
-                        summary: `Instruction for program ${programId.toBase58()}`,
-                        details: {
-                            data: Buffer.from(ix.data).toString('hex')
-                        },
-                        direction: 'UNKNOWN'
-                    });
-                }
-            }
+            const action = await this.parseInstruction(programId, Buffer.from(ix.data), accountKeys, ixAccounts);
+            if (action) actions.push(action);
         }
 
         // Handle Inner Instructions
@@ -199,46 +151,62 @@ export class SolanaParser {
             for (const innerBlock of innerInstructions) {
                 for (const ix of innerBlock.instructions) {
                     const programId = accountKeys[ix.programIdIndex];
-                    const parser = this.registry.get(programId);
-                    if (parser) {
-                        const ixAccounts = ix.accounts.map((idx: number) => accountKeys[idx]);
-                        const context: ParserContext = {
-                            tx: {} as any,
-                            instruction: {
-                                programId,
-                                keys: ixAccounts.map((pubkey: PublicKey) => ({ pubkey, isSigner: false, isWritable: false })),
-                                data: Buffer.from(ix.data),
-                            },
-                            accounts: accountKeys,
-                            programId,
-                            connection: this.connection
-                        };
-                        const action = await parser.parse(context);
-                        if (action) actions.push(action);
-                    } else {
-                        // Try Anchor Parser fallback for inner instructions
-                        const ixAccounts = ix.accounts.map((idx: number) => accountKeys[idx]);
-                        const context: ParserContext = {
-                            tx: {} as any,
-                            instruction: {
-                                programId,
-                                keys: ixAccounts.map((pubkey: PublicKey) => ({ pubkey, isSigner: false, isWritable: false })),
-                                data: Buffer.from(ix.data),
-                            },
-                            accounts: accountKeys, // Note: might need better account resolution for inner instructions context if they rely on index
-                            programId,
-                            connection: this.connection
-                        };
-                        const anchorAction = await this.anchorParser.parse(context);
-                        if (anchorAction) {
-                            actions.push(anchorAction);
-                        }
-                    }
+                    const ixAccounts = ix.accounts.map((idx: number) => accountKeys[idx]);
+
+                    const action = await this.parseInstruction(programId, Buffer.from(ix.data), accountKeys, ixAccounts);
+                    if (action) actions.push(action);
                 }
             }
         }
 
-
         return actions;
+    }
+
+    /**
+     * Helper method to parse a single instruction using registered parsers or fallback to Anchor.
+     * @param programId The program ID of the instruction
+     * @param data The instruction data buffer
+     * @param accountKeys All account keys involved in the transaction
+     * @param instructionAccounts The specific accounts used in this instruction
+     */
+    private async parseInstruction(
+        programId: PublicKey,
+        data: Buffer,
+        accountKeys: PublicKey[],
+        instructionAccounts: PublicKey[]
+    ): Promise<ParsedAction | null> {
+        const parser = this.registry.get(programId);
+
+        const context: ParserContext = {
+            tx: {} as any, // Context tx is often not fully used by simple parsers, keeping strict backward compat
+            instruction: {
+                programId,
+                keys: instructionAccounts.map((pubkey: PublicKey) => ({ pubkey, isSigner: false, isWritable: false })),
+                data: data,
+            },
+            accounts: accountKeys,
+            programId,
+            connection: this.connection
+        };
+
+        if (parser) {
+            return await parser.parse(context);
+        } else {
+            // Try Anchor Parser fallback
+            const anchorAction = await this.anchorParser.parse(context);
+            if (anchorAction) {
+                return anchorAction;
+            } else {
+                return {
+                    protocol: 'Unknown',
+                    type: 'Unknown',
+                    summary: `Instruction for program ${programId.toBase58()}`,
+                    details: {
+                        data: data.toString('hex')
+                    },
+                    direction: 'UNKNOWN'
+                };
+            }
+        }
     }
 }
