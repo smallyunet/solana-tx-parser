@@ -1,0 +1,61 @@
+name: E2E Tests
+
+on:
+  # Manual trigger with optional RPC URL input
+  workflow_dispatch:
+    inputs:
+      rpc_url:
+        description: 'Solana RPC URL (leave empty to use secret)'
+        required: false
+        type: string
+  
+  # Run on schedule (weekly) to catch regressions
+  schedule:
+    - cron: '0 0 * * 0'  # Every Sunday at midnight UTC
+
+  # Run on main branch pushes (optional)
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'src/**'
+      - 'tests/e2e.test.ts'
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    # Only run if we have RPC URL available
+    if: ${{ github.event.inputs.rpc_url != '' || secrets.SOLANA_RPC_URL != '' }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10
+          
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          
+      - name: Install dependencies
+        run: pnpm install
+        
+      - name: Build
+        run: pnpm build
+        
+      - name: Run E2E Tests
+        env:
+          SOLANA_RPC_URL: ${{ github.event.inputs.rpc_url || secrets.SOLANA_RPC_URL }}
+        run: pnpm test:e2e
+        
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results
+          path: |
+            test-results/
+            coverage/
+          retention-days: 7
