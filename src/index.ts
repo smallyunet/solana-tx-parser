@@ -47,7 +47,7 @@ export class SolanaParser {
             return this.parseTransactionResponse(tx, txId);
         } catch (_e) {
             console.error("Error parsing transaction", _e);
-            return null;
+            throw _e;
         }
     }
 
