@@ -4,6 +4,8 @@ import { SystemProgramParser } from './parsers/system';
 import { SplTokenParser } from './parsers/spl-token';
 import { JupiterParser } from './parsers/jupiter';
 import { AnchorParser } from './parsers/anchor';
+import { RaydiumParser } from './parsers/raydium';
+import { OrcaParser } from './parsers/orca';
 import { ParsedResult, ParserContext, ParsedAction } from './types';
 
 // Re-export types for consumers
@@ -26,6 +28,8 @@ export class SolanaParser {
         this.registry.register(new SystemProgramParser());
         this.registry.register(new SplTokenParser());
         this.registry.register(new JupiterParser());
+        this.registry.register(new RaydiumParser());
+        this.registry.register(new OrcaParser());
     }
 
     getRegistry(): ParserRegistry {

@@ -9,7 +9,22 @@ export class JupiterParser implements Parser {
         // Try Anchor parsing first (IDL based)
         const anchorParser = new AnchorParser();
         const anchorAction = await anchorParser.parse(context);
+
         if (anchorAction) {
+            // Enhanced parsing: Extract amounts if available in IDL data
+            const data = anchorAction.details.data as any;
+            if (data && (data.inAmount || data.amount || data.outAmount)) {
+                const inAmount = data.inAmount || data.amount || '0';
+                const outAmount = data.outAmount || data.quotedOutAmount || '0';
+
+                if (inAmount !== '0' || outAmount !== '0') {
+                    anchorAction.summary = `Jupiter Swap: ${inAmount} -> ${outAmount} (Quoted)`;
+                    anchorAction.details.extractedAmounts = {
+                        inAmount,
+                        outAmount
+                    };
+                }
+            }
             return anchorAction;
         }
 
@@ -21,11 +36,6 @@ export class JupiterParser implements Parser {
 
         // Anchor discriminator
         const discriminator = data.subarray(0, 8);
-
-        // These are standard sighashes for Jupiter v6
-        // route: e517cb977ae3ad2a
-        // shared_accounts_route: c1209b3341d69c81
-
         const hexDisc = discriminator.toString('hex');
 
         if (hexDisc === 'e517cb977ae3ad2a') { // route
@@ -51,10 +61,6 @@ export class JupiterParser implements Parser {
                 direction: 'UNKNOWN'
             };
         }
-
-        // TODO: More detailed parsing (mints, amounts)
-        // This requires knowing the exact layout which is complex for Jupiter (vector of instructions, etc.)
-        // For v0.0.3, we identify the instruction type.
 
         return {
             protocol: 'Jupiter',
