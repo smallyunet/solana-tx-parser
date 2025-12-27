@@ -3,14 +3,14 @@
 ## Phase 1: Foundation (Current)
 - [x] Core Parser Architecture
 - [x] System Program Parser
-- [x] Universal Anchor/IDL Fallback (Skeleton)
+- [x] Universal Anchor/IDL Fallback (Implemented v0.0.4)
 - [x] Simulation Mode
 - [x] Basic Documentation
 
 ## Phase 2: Infrastructure (In Progress)
 - [x] CI/CD Pipelines (GitHub Actions)
 - [x] Automated Testing Setup
-- [ ] API Documentation (TypeDoc)
+- [x] API Documentation (TypeDoc)
 - [ ] Community Guidelines
 
 ## Phase 3: Protocol Expansion (Q1 2026)

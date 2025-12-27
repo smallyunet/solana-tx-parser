@@ -10,9 +10,13 @@ A robust, extensible TypeScript library for parsing Solana transactions into str
 ## Features
 
 - **Adapter Pattern:** Easily extensible parser registry.
-- **Universal IDL Resolver:** Auto-decoding via Anchor IDLs (Skeleton).
+- **Universal IDL Resolver:** Auto-fetching and decoding via Anchor IDLs (v0.0.4+).
 - **Structured Output:** Strictly typed `ParsedResult`.
 - **Inner Instructions:** Handles nested CPIs.
+
+## Examples
+
+Check out the [examples](./examples) directory for more usage scenarios, including a [web demo](./examples/web_demo).
 
 ## Installation
 
