@@ -13,7 +13,7 @@ export default defineConfig({
     base: './',
     build: {
         outDir: '../../docs',
-        emptyOutDir: true
+        emptyOutDir: false  // Preserve api/, EXAMPLES.md, e2e-results/
     },
     resolve: {
         alias: {
